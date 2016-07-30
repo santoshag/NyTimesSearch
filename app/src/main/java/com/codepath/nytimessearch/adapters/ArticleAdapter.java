@@ -2,7 +2,6 @@ package com.codepath.nytimessearch.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,15 +101,9 @@ public class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private void configureArticleViewHolder(ArticleViewHolder viewHolder, int position) {
         final Article article = (Article) mArticles.get(position);
-
-
-        if(article != null) {
             // Set item views based on your views and data model
-            TextView tvTitle = viewHolder.getTvTitle();
-            tvTitle.setText(article.headline.mainHeadline);
-        }else{
-            Log.i("adapter", "null");
-        }
+        TextView tvTitle = viewHolder.getTvTitle();
+        tvTitle.setText(article.headline.mainHeadline);
     }
 
     private void configurerArticleThumbnailViewHolder(ArticleThumbnailViewHolder viewHolder, int position) {
@@ -122,7 +115,6 @@ public class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvTitle.setText(article.headline.mainHeadline);
             ImageView ivThumbnail = viewHolder.getIvThumbnail();
             Picasso.with(getContext()).load(article.thumbnails.get(0).getThumbnailUrl()).transform(new RoundedCornersTransformation(15, 15, RoundedCornersTransformation.CornerType.ALL)).into(ivThumbnail);
-//
         }
     }
 

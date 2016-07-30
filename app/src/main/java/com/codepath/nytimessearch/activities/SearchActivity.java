@@ -16,24 +16,30 @@ import android.widget.EditText;
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.adapters.ArticleAdapter;
 import com.codepath.nytimessearch.models.Article;
+import com.codepath.nytimessearch.models.ArticlesResponse;
 import com.codepath.nytimessearch.models.Response;
+import com.codepath.nytimessearch.utils.ArticlesService;
 import com.codepath.nytimessearch.utils.EndlessRecyclerViewScrollListener;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.TextHttpResponseHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-import cz.msebera.android.httpclient.Header;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SearchActivity extends AppCompatActivity {
     EditText etQuery;
     Button btnSearch;
     ArrayList<Article> articles;
     ArticleAdapter adapter;
+    final static String BASE_URL = "https://api.nytimes.com";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,14 +99,13 @@ public class SearchActivity extends AppCompatActivity {
                 new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         // Attach the layout manager to the recycler view
         rvArticles.addOnScrollListener(new EndlessRecyclerViewScrollListener(staggeredGridLayoutManager) {
-
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 Log.i("DEBUG","page: " + page );
-                getArticles(searchQuery, page);
+                if(page < ArticlesResponse.MAX_PAGES_TO_RETRIEVE) {
+                    getArticles(searchQuery, page);
+                }
             }
-
-
         });
 
         rvArticles.setLayoutManager(staggeredGridLayoutManager);
@@ -118,62 +123,70 @@ public class SearchActivity extends AppCompatActivity {
         if(page == 0) {
             articles.clear();
         }
-        AsyncHttpClient client = new AsyncHttpClient();
-        String url = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
-        RequestParams params = new RequestParams();
-        params.put("api-key", "119d6da8a49945548737cfc94407e7a0");
-        params.put("page", page);
-        params.put("q", searchQuery);
 
-        client.get(url, params, new TextHttpResponseHandler() {
+        final String apiKey = "119d6da8a49945548737cfc94407e7a0";
 
+        //Use retrofit networking library to make API calls
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        /*
+            //Add below interceptor to enable debugging logs
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+            // Can be Level.BASIC, Level.HEADERS, or Level.BODY
+            // See http://square.github.io/okhttp/3.x/logging-interceptor/ to see the options.
+            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            builder.networkInterceptors().add(httpLoggingInterceptor);
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString){
+        */
+        builder.interceptors().add(new Interceptor() {
+                @Override
+                public okhttp3.Response intercept(Chain chain) throws IOException {
+                    Request original = chain.request();
+                    HttpUrl originalHttpUrl = original.url();
 
-                Log.i("success", responseString);
+                    HttpUrl url = originalHttpUrl.newBuilder()
+                            .addQueryParameter("api-key", apiKey)
+                            .build();
 
-                Gson gson = new GsonBuilder().create();
-                Response response = gson.fromJson(responseString, Response.class);
-/*                List<Article> articles1 = response.articlesResponse.articles;
-                for (Article result : articles1) {
+                    // Request customization: add request headers
+                    Request.Builder requestBuilder = original.newBuilder()
+                            .url(url);
 
-                    Log.i("INFO", "Headline: " + result.headline.mainHeadline + " weburl: " +result.webUrl);
-                    if(result.thumbnails.size() > 0){
-                        Log.i("INFO", result.thumbnails.get(0).getThumbnailUrl());
-                    }
-                }*/
-                articles.addAll(response.articlesResponse.articles);
-                adapter.notifyDataSetChanged();
-            }
+                    Request request = requestBuilder.build();
+                    return chain.proceed(request);
 
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Log.i("DEBUG error", responseString);
-            }
-    });
-
-        /*//using async http request
-        client.get(url, params, new JsonHttpResponseHandler(){
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                JSONArray articleJsonResults = null;
-                try{
-                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-                    articles.addAll(Article.fromJSONArray(articleJsonResults));
-                    Log.d("SearchActivity", articles.toString());
-                    adapter.notifyDataSetChanged();
-
-                }catch (JSONException e){
-                    e.printStackTrace();
                 }
-            }
+            });
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                super.onFailure(statusCode, headers, responseString, throwable);
-            }
-        });*/
+
+            OkHttpClient httpClient = builder.build();
+
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .client(httpClient)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            ArticlesService articlesService = retrofit.create(ArticlesService.class);
+            Call<Response> call = articlesService.listArticles(searchQuery, page);
+            call.enqueue(new Callback<Response>() {
+
+                @Override
+                public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                    int statusCode = response.code();
+                    Response user = response.body();
+                    ArrayList<Article> articles2 = new ArrayList<Article>();
+                    articles.addAll(user.articlesResponse.articles);
+                    adapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onFailure(Call<Response> call, Throwable t) {
+                    Log.i("DEBUG", " Call to network failed! ");
+                }
+            });
+
+
+
     }
 }

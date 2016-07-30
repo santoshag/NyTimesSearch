@@ -10,6 +10,8 @@ import java.util.List;
  */
 public class ArticlesResponse {
 
+    public static int MAX_PAGES_TO_RETRIEVE = 20;
+
     @SerializedName("docs")
     public List<Article> articles;
 
