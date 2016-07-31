@@ -1,17 +1,15 @@
 package com.codepath.nytimessearch.activities;
 
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.OvershootInterpolator;
-import android.widget.Button;
-import android.widget.EditText;
 
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.adapters.ArticleAdapter;
@@ -20,11 +18,13 @@ import com.codepath.nytimessearch.models.ArticlesResponse;
 import com.codepath.nytimessearch.models.Response;
 import com.codepath.nytimessearch.utils.ArticlesService;
 import com.codepath.nytimessearch.utils.EndlessRecyclerViewScrollListener;
+import com.codepath.nytimessearch.utils.Utilities;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -35,8 +35,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SearchActivity extends AppCompatActivity {
-    EditText etQuery;
-    Button btnSearch;
+
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.rvArticles) RecyclerView rvArticles;
     ArrayList<Article> articles;
     ArticleAdapter adapter;
     final static String BASE_URL = "https://api.nytimes.com";
@@ -45,22 +46,45 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        setUpViews();
     }
 
-    private void setUpViews(){
-        etQuery = (EditText) findViewById(R.id.etQuery);
-        btnSearch = (Button) findViewById(R.id.btnSearch);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // perform query here
+
+                // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
+                // see https://code.google.com/p/android/issues/detail?id=24599
+                searchView.clearFocus();
+                searchArticles(query);
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        return super.onCreateOptionsMenu(menu);
     }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Utilities.checkForInternet();
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -70,25 +94,23 @@ public class SearchActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+/*        if (id == R.id.action_settings) {
             return true;
-        }
+        }*/
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void onArticleSearch(View view) {
-        final String searchQuery = etQuery.getText().toString();
+    public void searchArticles(final String searchQuery) {
 
         // Lookup the recyclerview in activity layout
-        RecyclerView rvArticles = (RecyclerView) findViewById(R.id.rvArticles);
-        rvArticles.setItemAnimator(new SlideInUpAnimator(new OvershootInterpolator(1f)));
+        //rvArticles.setItemAnimator(new SlideInUpAnimator(new OvershootInterpolator(1f)));
 
         // Get movies
         articles = new ArrayList<>();
 
         //search articles on page 0 initially
-        getArticles(searchQuery, 0);
+        fetchArticles(searchQuery, 0);
         // Create adapter passing in articles list
         adapter = new ArticleAdapter(this, articles);
         // Attach the adapter to the recyclerview to populate items
@@ -103,7 +125,7 @@ public class SearchActivity extends AppCompatActivity {
             public void onLoadMore(int page, int totalItemsCount) {
                 Log.i("DEBUG","page: " + page );
                 if(page < ArticlesResponse.MAX_PAGES_TO_RETRIEVE) {
-                    getArticles(searchQuery, page);
+                    fetchArticles(searchQuery, page);
                 }
             }
         });
@@ -111,13 +133,11 @@ public class SearchActivity extends AppCompatActivity {
         rvArticles.setLayoutManager(staggeredGridLayoutManager);
 
         //Toast.makeText(this, "Searching for: " + searchQuery, Toast.LENGTH_LONG).show();
-
-
     }
 
 
 
-    private void getArticles(final String searchQuery, final int page){
+    private void fetchArticles(final String searchQuery, final int page){
 
         //clear articles if it is a new search
         if(page == 0) {

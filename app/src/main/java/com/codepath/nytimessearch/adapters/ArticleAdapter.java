@@ -8,13 +8,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.models.Article;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 /**
  * Created by santoshag on 7/19/16.
@@ -114,7 +112,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             TextView tvTitle = viewHolder.getTvTitle();
             tvTitle.setText(article.headline.mainHeadline);
             ImageView ivThumbnail = viewHolder.getIvThumbnail();
-            Picasso.with(getContext()).load(article.thumbnails.get(0).getThumbnailUrl()).transform(new RoundedCornersTransformation(15, 15, RoundedCornersTransformation.CornerType.ALL)).into(ivThumbnail);
+            Glide.with(getContext()).load(article.thumbnails.get(0).getThumbnailUrl()).into(ivThumbnail);
         }
     }
 
