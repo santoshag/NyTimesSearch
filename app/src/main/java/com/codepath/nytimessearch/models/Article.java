@@ -2,12 +2,15 @@ package com.codepath.nytimessearch.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import org.parceler.Parcel;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by santoshag on 7/26/16.
  */
+@Parcel
 public class Article {
 
 

@@ -38,7 +38,7 @@
             android:id="@+id/tvTitle"
             android:padding="5dp"
             android:layout_below="@+id/ivThumbnail"
-            android:textColor="#125688"/>
+            android:textColor="@color/colorPrimary"/>
         
     </RelativeLayout>
 

@@ -1,18 +1,28 @@
 package com.codepath.nytimessearch.activities;
 
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.adapters.ArticleAdapter;
+import com.codepath.nytimessearch.decorators.ItemClickSupport;
+import com.codepath.nytimessearch.fragments.SearchFilterFragment;
 import com.codepath.nytimessearch.models.Article;
 import com.codepath.nytimessearch.models.ArticlesResponse;
 import com.codepath.nytimessearch.models.Response;
@@ -20,8 +30,12 @@ import com.codepath.nytimessearch.utils.ArticlesService;
 import com.codepath.nytimessearch.utils.EndlessRecyclerViewScrollListener;
 import com.codepath.nytimessearch.utils.Utilities;
 
+import org.parceler.Parcels;
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,11 +50,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SearchActivity extends AppCompatActivity {
 
-    @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.rvArticles) RecyclerView rvArticles;
+
+    @BindView(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.rvArticles)
+    RecyclerView rvArticles;
     ArrayList<Article> articles;
     ArticleAdapter adapter;
     final static String BASE_URL = "https://api.nytimes.com";
+    SharedPreferences filterPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +68,32 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-    }
+        filterPreferences = getSharedPreferences(Utilities.FILTER_PREFERENCES, Context.MODE_PRIVATE);
+        filterPreferences.edit().clear().commit();
+        // Get the intent, verify the action and get the query
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            Log.i("Search", intent.getStringExtra(SearchManager.QUERY));
+            String query = intent.getStringExtra(SearchManager.QUERY);
 
+            searchArticles(query);
+        }
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        // Assumes current activity is the searchable activity
+//        Log.i("search", searchManager.getSearchableInfo(getComponentName()).toString());
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchActivity.class)));
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -80,7 +117,7 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         Utilities.checkForInternet();
     }
@@ -94,15 +131,22 @@ public class SearchActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-/*        if (id == R.id.action_settings) {
-            return true;
-        }*/
+        if (id == R.id.action_search) {
+            SearchFilterFragment myDialog = new SearchFilterFragment();
+
+
+            FragmentManager fm = getSupportFragmentManager();
+            myDialog.show(fm, "test");
+        }
 
         return super.onOptionsItemSelected(item);
     }
 
     public void searchArticles(final String searchQuery) {
 
+
+        String sort_order = filterPreferences.getString("sort_order", null);
+        Log.i("info", "sort_order: " + sort_order);
         // Lookup the recyclerview in activity layout
         //rvArticles.setItemAnimator(new SlideInUpAnimator(new OvershootInterpolator(1f)));
 
@@ -118,29 +162,41 @@ public class SearchActivity extends AppCompatActivity {
         // Set layout manager to position the items
         // First param is number of columns and second param is orientation i.e Vertical or Horizontal
         StaggeredGridLayoutManager staggeredGridLayoutManager =
-                new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
+                new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         // Attach the layout manager to the recycler view
+
+        staggeredGridLayoutManager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
         rvArticles.addOnScrollListener(new EndlessRecyclerViewScrollListener(staggeredGridLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                Log.i("DEBUG","page: " + page );
-                if(page < ArticlesResponse.MAX_PAGES_TO_RETRIEVE) {
+                Log.i("DEBUG", "page: " + page);
+                if (page < ArticlesResponse.MAX_PAGES_TO_RETRIEVE) {
                     fetchArticles(searchQuery, page);
                 }
             }
         });
 
+        ItemClickSupport.addTo(rvArticles).setOnItemClickListener(
+                new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Article article = articles.get(position);
+                        Intent intent = new Intent(SearchActivity.this, ArticleDetailActivity.class);
+                        intent.putExtra("article", Parcels.wrap(article));
+                        startActivity(intent);
+                    }
+                }
+        );
         rvArticles.setLayoutManager(staggeredGridLayoutManager);
 
         //Toast.makeText(this, "Searching for: " + searchQuery, Toast.LENGTH_LONG).show();
     }
 
 
-
-    private void fetchArticles(final String searchQuery, final int page){
+    private void fetchArticles(final String searchQuery, final int page) {
 
         //clear articles if it is a new search
-        if(page == 0) {
+        if (page == 0) {
             articles.clear();
         }
 
@@ -148,65 +204,76 @@ public class SearchActivity extends AppCompatActivity {
 
         //Use retrofit networking library to make API calls
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        /*
-            //Add below interceptor to enable debugging logs
-            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+
+        //Add below interceptor to enable debugging logs
+  /*          HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
             // Can be Level.BASIC, Level.HEADERS, or Level.BODY
             // See http://square.github.io/okhttp/3.x/logging-interceptor/ to see the options.
             httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             builder.networkInterceptors().add(httpLoggingInterceptor);
+*/
 
-        */
         builder.interceptors().add(new Interceptor() {
-                @Override
-                public okhttp3.Response intercept(Chain chain) throws IOException {
-                    Request original = chain.request();
-                    HttpUrl originalHttpUrl = original.url();
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request original = chain.request();
+                HttpUrl originalHttpUrl = original.url();
 
-                    HttpUrl url = originalHttpUrl.newBuilder()
-                            .addQueryParameter("api-key", apiKey)
-                            .build();
+                HttpUrl url = originalHttpUrl.newBuilder()
+                        .addQueryParameter("api-key", apiKey)
+                        .build();
 
-                    // Request customization: add request headers
-                    Request.Builder requestBuilder = original.newBuilder()
-                            .url(url);
+                // Request customization: add request headers
+                Request.Builder requestBuilder = original.newBuilder()
+                        .url(url);
 
-                    Request request = requestBuilder.build();
-                    return chain.proceed(request);
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
 
-                }
-            });
-
-
-            OkHttpClient httpClient = builder.build();
+            }
+        });
 
 
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .client(httpClient)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+        OkHttpClient httpClient = builder.build();
 
-            ArticlesService articlesService = retrofit.create(ArticlesService.class);
-            Call<Response> call = articlesService.listArticles(searchQuery, page);
-            call.enqueue(new Callback<Response>() {
 
-                @Override
-                public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
-                    int statusCode = response.code();
-                    Response user = response.body();
-                    ArrayList<Article> articles2 = new ArrayList<Article>();
-                    articles.addAll(user.articlesResponse.articles);
-                    adapter.notifyDataSetChanged();
-                }
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(httpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-                @Override
-                public void onFailure(Call<Response> call, Throwable t) {
-                    Log.i("DEBUG", " Call to network failed! ");
-                }
-            });
+        Map<String, String> params = new HashMap<>();
 
+        params.put("q", searchQuery);
+        params.put("page", String.valueOf(page));
+
+        String sort_order = filterPreferences.getString("sort_order", "");
+
+        if (!TextUtils.isEmpty(sort_order)) {
+            params.put("sort", sort_order);
+        }
+
+
+        ArticlesService articlesService = retrofit.create(ArticlesService.class);
+        Call<Response> call = articlesService.listArticles(params);
+        call.enqueue(new Callback<Response>() {
+
+            @Override
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                int statusCode = response.code();
+                Response r = response.body();
+                articles.addAll(r.articlesResponse.articles);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<Response> call, Throwable t) {
+                Log.i("DEBUG", " Call to network failed! ");
+            }
+        });
 
 
     }
+
 }

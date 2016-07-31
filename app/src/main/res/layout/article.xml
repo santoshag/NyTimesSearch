@@ -30,7 +30,7 @@
             android:id="@+id/tvTitle"
             android:padding="5dp"
             android:layout_alignParentTop="true"
-            android:textColor="#125688"/>
+            android:textColor="@color/colorPrimary"/>
 
     </RelativeLayout>
 
