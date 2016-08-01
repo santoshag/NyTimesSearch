@@ -3,7 +3,6 @@ package com.codepath.nytimessearch.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -19,6 +18,9 @@ public class ArticleDetailActivity extends AppCompatActivity {
 
     @BindView(R.id.wvArticle)
     WebView wvArticle;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +28,8 @@ public class ArticleDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_article_detail);
         ButterKnife.bind(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Article article = (Article) Parcels.unwrap(getIntent().getParcelableExtra("article"));
-        Log.i("DEB", article.headline.mainHeadline);
         wvArticle.setWebViewClient(new WebViewClient(){
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {

@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
@@ -21,8 +20,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.codepath.nytimessearch.R;
@@ -84,7 +81,6 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
         switchCompat.setOnCheckedChangeListener(onCheckedChanged());
         sharedpreferences = getActivity().getSharedPreferences(Utilities.FILTER_PREFERENCES, Context.MODE_PRIVATE);
 
-
         ivBeginDate.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -105,19 +101,9 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
 
             }
         });
-//        spinner = (Spinner) view.findViewById(R.id.spinnerDate);
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-                R.array.date_options, android.R.layout.simple_spinner_item);
-// Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-// Apply the adapter to the spinner
-//        spinner.setAdapter(adapter);
 
         String[] strArr = getResources().getStringArray(R.array.news_desks);
-
         mArrFilter = new ArrayList<>();
-
         int lengthOfstrArr = strArr.length;
 
         for (int i = 0; i < lengthOfstrArr; i++) {
@@ -126,7 +112,6 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
             filter_object.mIsSelected = false;
             mArrFilter.add(filter_object);
         }
-
 
         setFilter(view);
     }
@@ -211,14 +196,12 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
             Log.i("nd", fil.mName);
             if (fil.mIsSelected) {
                 String news_desk = sharedpreferences.getString("news_desk", "");
-                Log.i("Adding", news_desk + " \"" + fil.mName + "\" ");
+                //add to filters shared preferences
                 sharedpreferences.edit().putString("news_desk", news_desk + " \"" + fil.mName + "\" ").commit();
                 isSelected = true;
                 arrFilterSelected.add(fil);
             }
         }
-
-        Log.i("news_desk", sharedpreferences.getString("news_desk", "test"));
 
         if (isSelected) {
             svFilter.setVisibility(View.VISIBLE);

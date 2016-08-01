@@ -98,8 +98,6 @@ public class SearchActivity extends AppCompatActivity {
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        // Assumes current activity is the searchable activity
-//        Log.i("search", searchManager.getSearchableInfo(getComponentName()).toString());
         searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchActivity.class)));
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
 
@@ -107,12 +105,8 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // perform query here
-
-                // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
-                // see https://code.google.com/p/android/issues/detail?id=24599
                 searchView.clearFocus();
                 searchArticles(query);
-
                 return true;
             }
 
@@ -144,8 +138,6 @@ public class SearchActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
             SearchFilterFragment myDialog = new SearchFilterFragment();
-
-
             FragmentManager fm = getSupportFragmentManager();
             myDialog.show(fm, "test");
         }
@@ -197,8 +189,6 @@ public class SearchActivity extends AppCompatActivity {
                 }
         );
         rvArticles.setLayoutManager(staggeredGridLayoutManager);
-
-        //Toast.makeText(this, "Searching for: " + searchQuery, Toast.LENGTH_LONG).show();
     }
 
 
@@ -244,8 +234,6 @@ public class SearchActivity extends AppCompatActivity {
 
 
         OkHttpClient httpClient = builder.build();
-
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(httpClient)
@@ -276,7 +264,6 @@ public class SearchActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(news_desk)) {
             params.put("fq", "news_desk:(" + news_desk + ")");
         }
-
 
         ArticlesService articlesService = retrofit.create(ArticlesService.class);
         Call<Response> call = articlesService.listArticles(params);
