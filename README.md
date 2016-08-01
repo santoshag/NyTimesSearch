@@ -42,6 +42,7 @@ The following **bonus** features are implemented:
 The following **additional** features are implemented:
 
 * [x] Custom fonts
+* [x] Voice search
 * [x] Card views for list elements
 
 
