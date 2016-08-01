@@ -41,8 +41,9 @@ The following **bonus** features are implemented:
 
 The following **additional** features are implemented:
 
+* [x] Voice search 
+* [x] Read the article title and snippet using TextToSpeech feature 
 * [x] Custom fonts
-* [x] Voice search
 * [x] Card views for list elements
 
 
@@ -56,7 +57,8 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 Updated version:
 
-[Watch on Youtube](https://youtu.be/FjvaeTrHY2Y) 
+[Watch on Youtube ](https://youtu.be/FjvaeTrHY2Y)
+[Watch on Youtube - Text to speech feature](https://youtu.be/zN92Iuzl6Es) 
 
 ## Notes
 
