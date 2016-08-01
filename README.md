@@ -42,7 +42,7 @@ The following **bonus** features are implemented:
 The following **additional** features are implemented:
 
 * [x] Voice search 
-* [x] Read the article title and snippet using TextToSpeech feature 
+* [x] Read the article headline and snippet using TextToSpeech feature 
 * [x] Custom fonts
 * [x] Card views for list elements
 
