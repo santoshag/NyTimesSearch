@@ -1,7 +1,6 @@
 package com.codepath.nytimessearch.activities;
 
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,7 +45,6 @@ import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
@@ -77,15 +75,16 @@ public class SearchActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         Typeface titleFont = Typeface.createFromAsset(this.getAssets(), "fonts/englishtowne.ttf");
         toolbar_title.setTypeface(titleFont);
-
-
         filterPreferences = getSharedPreferences(Utilities.FILTER_PREFERENCES, Context.MODE_PRIVATE);
-        filterPreferences.edit().clear().commit();
+
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             searchArticles(query);
+        }else{
+            //clear only on new activity launches
+            filterPreferences.edit().clear().commit();
         }
 
     }
@@ -98,7 +97,7 @@ public class SearchActivity extends AppCompatActivity {
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, SearchActivity.class)));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -205,11 +204,11 @@ public class SearchActivity extends AppCompatActivity {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
         //Add below interceptor to enable debugging logs
-            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+            /*HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
             // Can be Level.BASIC, Level.HEADERS, or Level.BODY
             // See http://square.github.io/okhttp/3.x/logging-interceptor/ to see the options.
             httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            builder.networkInterceptors().add(httpLoggingInterceptor);
+            builder.networkInterceptors().add(httpLoggingInterceptor);*/
 
 
         builder.interceptors().add(new Interceptor() {

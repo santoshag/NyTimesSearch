@@ -13,11 +13,9 @@
         <activity
             android:name=".activities.SearchActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="standard">
+
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -30,6 +28,17 @@
             android:name=".activities.ArticleDetailActivity"
             android:label="@string/title_activity_article_detail"
             android:theme="@style/AppTheme"></activity>
+        <activity
+            android:name=".activities.SplashActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

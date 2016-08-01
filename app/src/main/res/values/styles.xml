@@ -33,4 +33,7 @@
     <declare-styleable name="FlowLayout_Layout">
         <attr name="android:layout_gravity" />
     </declare-styleable>
+
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar"></style>
+
 </resources>
