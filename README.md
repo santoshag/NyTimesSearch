@@ -56,7 +56,7 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 Updated version:
 
-[Watch on Youtube](https://youtu.be/fGgtIIO_AMc) 
+[Watch on Youtube](https://youtu.be/FjvaeTrHY2Y) 
 
 ## Notes
 
