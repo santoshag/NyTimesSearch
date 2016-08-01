@@ -2,7 +2,7 @@
 
 **NYTimes Article Search** is an android app that allows a user to search for articles on web using simple filters. The app utilizes [New York Times Search API](http://developer.nytimes.com/docs/read/article_search_api_v2).
 
-Time spent: **30** hours spent in total
+Time spent: **35** hours spent in total
 
 ## User Stories
 
@@ -55,12 +55,15 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+Need to manage time better.
 
 ## Open-source libraries used
 
-- [Android Async HTTP](https://github.com/loopj/android-async-http) - Simple asynchronous HTTP requests with JSON parsing
-- [Picasso](http://square.github.io/picasso/) - Image loading and caching library for Android
+- [Android Retrofit 2](http://square.github.io/retrofit/) - Retrofit is a type-safe REST client for Android
+- [Gson](https://github.com/google/gson) - Library to streamline the parsing of JSON data
+- [Glide](https://github.com/bumptech/glide) - Image loading and caching library for Android
+- [Butterknife](http://jakewharton.github.io/butterknife/) - View "injection" library for Android
+
 
 ## License
 

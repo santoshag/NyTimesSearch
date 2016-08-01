@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -40,18 +41,25 @@ import butterknife.ButterKnife;
 public class SearchFilterFragment extends BottomSheetDialogFragment {
 
 
-    private Spinner spinner;
-    private ImageView ivBeginDate;
-    private ImageView ivEndDate;
-    private ListView mListView;
+    @BindView(R.id.ivBeginDate)
+    public ImageView ivBeginDate;
+    @BindView(R.id.ivEndDate)
+    public ImageView ivEndDate;
+    @BindView(R.id.lvFilter)
+    public ListView lvFilter;
+    @BindView(R.id.svFilter)
+    public ScrollView svFilter;
+    @BindView(R.id.tvBeginDate)
+    public TextView tvBeginDate;
+    @BindView(R.id.tvEndDate)
+    public TextView tvEndDate;
+
     private ArrayList<Filter_Object> mArrFilter;
-    private ScrollView mScrollViewFilter;
-    private Filter_Adapter mFilter_Adapter;
-    private FlowLayout mFlowLayoutFilter;
+    public Filter_Adapter mFilter_Adapter;
+
+    @BindView(R.id.flFilter)
+    public FlowLayout flFilter;
     SharedPreferences sharedpreferences;
-    private String dateTag;
-    private TextView tvBeginDate;
-    private TextView tvEndDate;
 
 
     @Override
@@ -76,10 +84,7 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
         switchCompat.setOnCheckedChangeListener(onCheckedChanged());
         sharedpreferences = getActivity().getSharedPreferences(Utilities.FILTER_PREFERENCES, Context.MODE_PRIVATE);
 
-        ivBeginDate = (ImageView) view.findViewById(R.id.ivBeginDate);
-        ivEndDate = (ImageView) view.findViewById(R.id.ivEndDate);
-        tvBeginDate = (TextView) view.findViewById(R.id.tvBeginDate);
-        tvEndDate = (TextView) view.findViewById(R.id.tvEndDate);
+
         ivBeginDate.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -127,12 +132,10 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
     }
 
     private void setFilter(View v) {
-        mListView = (ListView) v.findViewById(R.id.listViewFilter);
-        mScrollViewFilter = (ScrollView) v.findViewById(R.id.scrollViewFilter);
-        mFlowLayoutFilter = (FlowLayout) v.findViewById(R.id.flowLayout);
+
 
         mFilter_Adapter = new Filter_Adapter(mArrFilter);
-        mListView.setAdapter(mFilter_Adapter);
+        lvFilter.setAdapter(mFilter_Adapter);
 
     }
 
@@ -166,18 +169,20 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
 
     }
 
-    private void setDate(String tag, int year, int month, int day){
+    private void setDate(String tag, int year, int month, int day) {
         SimpleDateFormat apiFormat = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat displayFormat = new SimpleDateFormat("MM/dd/yyyy");
-        Calendar calendar =  Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         calendar.clear();
         calendar.set(year, month, day);
         sharedpreferences.edit().putString(tag, apiFormat.format(calendar.getTime())).commit();
-        switch (tag){
-            case "begin_date":tvBeginDate.setText(displayFormat.format(calendar.getTime()));
+        switch (tag) {
+            case "begin_date":
+                tvBeginDate.setText(displayFormat.format(calendar.getTime()));
                 tvBeginDate.setVisibility(View.VISIBLE);
                 break;
-            case "end_date":tvEndDate.setText(displayFormat.format(calendar.getTime()));
+            case "end_date":
+                tvEndDate.setText(displayFormat.format(calendar.getTime()));
                 tvEndDate.setVisibility(View.VISIBLE);
                 break;
 
@@ -196,7 +201,7 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
     public void addFilterTag() {
         final ArrayList<Filter_Object> arrFilterSelected = new ArrayList<>();
 
-        mFlowLayoutFilter.removeAllViews();
+        flFilter.removeAllViews();
 
         int length = mArrFilter.size();
         sharedpreferences.edit().putString("news_desk", "").commit();
@@ -216,9 +221,9 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
         Log.i("news_desk", sharedpreferences.getString("news_desk", "test"));
 
         if (isSelected) {
-            mScrollViewFilter.setVisibility(View.VISIBLE);
+            svFilter.setVisibility(View.VISIBLE);
         } else {
-            mScrollViewFilter.setVisibility(View.INVISIBLE);
+            svFilter.setVisibility(View.INVISIBLE);
         }
         int size = arrFilterSelected.size();
         LayoutInflater layoutInflater = (LayoutInflater)
@@ -264,7 +269,7 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
 
             newView.setLayoutParams(params);
 
-            mFlowLayoutFilter.addView(newView);
+            flFilter.addView(newView);
         }
     }
 
@@ -301,20 +306,20 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
             if (convertView == null) {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.filter_list_item, null);
                 viewHolder = new ViewHolder();
-                viewHolder.mTtvName = (TextView) convertView.findViewById(R.id.tvName);
+                viewHolder.tvName = (TextView) convertView.findViewById(R.id.tvName);
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
             final Filter_Object mService_Object = arrMenu.get(position);
-            viewHolder.mTtvName.setText(mService_Object.mName);
+            viewHolder.tvName.setText(mService_Object.mName);
 
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                     mService_Object.mIsSelected = !mService_Object.mIsSelected;
-                    mScrollViewFilter.setVisibility(View.VISIBLE);
+                    svFilter.setVisibility(View.VISIBLE);
 
                     addFilterTag();
                     notifyDataSetChanged();
@@ -324,7 +329,7 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
         }
 
         public class ViewHolder {
-            TextView mTtvName;
+            TextView tvName;
 
         }
     }

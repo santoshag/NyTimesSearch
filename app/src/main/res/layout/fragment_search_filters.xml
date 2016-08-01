@@ -126,7 +126,7 @@
     </View>
 
     <ScrollView
-        android:id="@+id/scrollViewFilter"
+        android:id="@+id/svFilter"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:paddingLeft="10dp"
@@ -140,7 +140,7 @@
             android:orientation="vertical">
 
             <com.codepath.nytimessearch.fragments.FlowLayout
-                android:id="@+id/flowLayout"
+                android:id="@+id/flFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start|top"
@@ -157,7 +157,7 @@
         android:layout_marginLeft="20dp"
         android:weightSum="1"
         android:minHeight="100dp"
-        android:layout_below="@+id/scrollViewFilter">
+        android:layout_below="@+id/svFilter">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -167,7 +167,7 @@
                 android:textColor="@color/colorPrimary"
                 android:layout_weight=".60"/>
             <ListView
-                android:id="@+id/listViewFilter"
+                android:id="@+id/lvFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight=".50"
