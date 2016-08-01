@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentManager;
@@ -18,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.adapters.ArticleAdapter;
@@ -43,6 +45,7 @@ import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
@@ -57,6 +60,8 @@ public class SearchActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.rvArticles)
     RecyclerView rvArticles;
+    @BindView(R.id.toolbar_title)
+    TextView toolbar_title;
     ArrayList<Article> articles;
     ArticleAdapter adapter;
     final static String BASE_URL = "https://api.nytimes.com";
@@ -68,6 +73,11 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        Typeface titleFont = Typeface.createFromAsset(this.getAssets(), "fonts/englishtowne.ttf");
+        toolbar_title.setTypeface(titleFont);
+
+
         filterPreferences = getSharedPreferences(Utilities.FILTER_PREFERENCES, Context.MODE_PRIVATE);
         filterPreferences.edit().clear().commit();
         // Get the intent, verify the action and get the query
@@ -145,8 +155,7 @@ public class SearchActivity extends AppCompatActivity {
     public void searchArticles(final String searchQuery) {
 
 
-        String sort_order = filterPreferences.getString("sort_order", null);
-        Log.i("info", "sort_order: " + sort_order);
+
         // Lookup the recyclerview in activity layout
         //rvArticles.setItemAnimator(new SlideInUpAnimator(new OvershootInterpolator(1f)));
 
@@ -206,12 +215,12 @@ public class SearchActivity extends AppCompatActivity {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
         //Add below interceptor to enable debugging logs
-  /*          HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
             // Can be Level.BASIC, Level.HEADERS, or Level.BODY
             // See http://square.github.io/okhttp/3.x/logging-interceptor/ to see the options.
             httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             builder.networkInterceptors().add(httpLoggingInterceptor);
-*/
+
 
         builder.interceptors().add(new Interceptor() {
             @Override
@@ -248,12 +257,27 @@ public class SearchActivity extends AppCompatActivity {
         params.put("q", searchQuery);
         params.put("page", String.valueOf(page));
 
-        String sort_order = filterPreferences.getString("sort_order", "");
+        String sort = filterPreferences.getString("sort", "");
+        String begin_date = filterPreferences.getString("begin_date", "");
+        String end_date = filterPreferences.getString("end_date", "");
+        String news_desk = filterPreferences.getString("news_desk", "");
 
-        if (!TextUtils.isEmpty(sort_order)) {
-            params.put("sort", sort_order);
+        Log.i("info", "sort: " + sort + " begin_date:" + begin_date + " end_date:" + end_date);
+
+        if (!TextUtils.isEmpty(sort)) {
+            params.put("sort", sort);
+        }
+        if (!TextUtils.isEmpty(begin_date)) {
+            params.put("begin_date", begin_date);
+        }
+        if (!TextUtils.isEmpty(end_date)) {
+            params.put("end_date", end_date);
+        }
+        if (!TextUtils.isEmpty(news_desk)) {
+            params.put("fq", "news_desk:(" + news_desk + ")");
         }
 
+        //fq=news_desk:("Sports"%20"Foreign")
 
         ArticlesService articlesService = retrofit.create(ArticlesService.class);
         Call<Response> call = articlesService.listArticles(params);

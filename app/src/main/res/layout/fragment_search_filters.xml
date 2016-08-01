@@ -6,11 +6,133 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/switch_compat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Oldest "
+        android:textOff="oldest"
+        android:textOn="newest"
+        app:showText="false"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_alignParentTop="true" />
+
+
+    <TextView
+        android:id="@+id/tvNewest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" Newest"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="14dp"
+        android:textColor="@color/colorPrimary"
+        android:layout_toRightOf="@id/switch_compat"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#90A4AE"
+        android:layout_below="@+id/tvNewest"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
+
+    </View>
+
+<LinearLayout
+    android:id="@+id/llDates"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="1"
+    android:layout_below="@+id/switch_compat"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:layout_margin="5dp"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight=".5">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Begin Date"
+        android:textColor="@color/colorPrimary"
+        android:gravity="center"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="5dp"
+        android:id="@+id/ivBeginDate"
+        android:src="@drawable/ic_today_black_24dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvBeginDate"
+            android:text="End Date"
+            android:textColor="@color/colorPrimary"
+            android:gravity="center"
+            android:visibility="invisible"
+
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight=".5">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="End Date"
+            android:textColor="@color/colorPrimary"
+            android:gravity="center"
+            />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:id="@+id/ivEndDate"
+            android:src="@drawable/ic_today_black_24dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="End Date"
+            android:id="@+id/tvEndDate"
+            android:textColor="@color/colorPrimary"
+            android:gravity="center"
+            android:visibility="invisible"
+            />
+    </LinearLayout>
+
+</LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/vDivider2"
+        android:background="#90A4AE"
+        android:layout_below="@+id/llDates"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
+
+    </View>
+
     <ScrollView
         android:id="@+id/scrollViewFilter"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:visibility="gone">
+        android:layout_height="30dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp"
+        android:layout_below="@+id/vDivider2"
+        android:visibility="invisible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,41 +144,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start|top"
-                android:minHeight="50dp"></com.codepath.nytimessearch.fragments.FlowLayout>
+                android:minHeight="0dp"></com.codepath.nytimessearch.fragments.FlowLayout>
         </LinearLayout>
 
     </ScrollView>
 
-    <android.support.v7.widget.SwitchCompat
-        android:id="@+id/switch_compat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_margin="20dp"
-        android:layout_below="@id/scrollViewFilter"
-        android:checked="false"
-        android:text="Sort"
-        android:textOff="oldest"
-        android:textOn="newest"
-        app:showText="false"/>
-
-    <Spinner
-        android:id="@+id/spinnerDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:spinnerMode="dropdown"
-        android:layout_margin="20dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/switch_compat"/>
-
-    <ListView
-        android:id="@+id/listViewFilter"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/spinnerDate"
-        android:background="@android:color/transparent"
-        android:listSelector="@android:color/transparent" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginLeft="20dp"
+        android:weightSum="1"
+        android:minHeight="100dp"
+        android:layout_below="@+id/scrollViewFilter">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="30dp"
+                android:paddingLeft="30dp"
+                android:text="News desks"
+                android:textColor="@color/colorPrimary"
+                android:layout_weight=".60"/>
+            <ListView
+                android:id="@+id/listViewFilter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".50"
+                android:layout_gravity="left"
+                android:background="@android:color/transparent"
+                android:listSelector="@android:color/transparent" />
+    </LinearLayout>
 
 </RelativeLayout>

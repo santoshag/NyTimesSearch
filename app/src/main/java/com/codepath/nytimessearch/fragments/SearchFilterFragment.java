@@ -1,10 +1,13 @@
 package com.codepath.nytimessearch.fragments;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,16 +16,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.utils.Utilities;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import butterknife.ButterKnife;
 
@@ -33,12 +41,17 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
 
 
     private Spinner spinner;
+    private ImageView ivBeginDate;
+    private ImageView ivEndDate;
     private ListView mListView;
     private ArrayList<Filter_Object> mArrFilter;
     private ScrollView mScrollViewFilter;
     private Filter_Adapter mFilter_Adapter;
     private FlowLayout mFlowLayoutFilter;
     SharedPreferences sharedpreferences;
+    private String dateTag;
+    private TextView tvBeginDate;
+    private TextView tvEndDate;
 
 
     @Override
@@ -52,8 +65,6 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
     }
 
     @Override
@@ -65,14 +76,38 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
         switchCompat.setOnCheckedChangeListener(onCheckedChanged());
         sharedpreferences = getActivity().getSharedPreferences(Utilities.FILTER_PREFERENCES, Context.MODE_PRIVATE);
 
-        spinner = (Spinner) view.findViewById(R.id.spinnerDate);
+        ivBeginDate = (ImageView) view.findViewById(R.id.ivBeginDate);
+        ivEndDate = (ImageView) view.findViewById(R.id.ivEndDate);
+        tvBeginDate = (TextView) view.findViewById(R.id.tvBeginDate);
+        tvEndDate = (TextView) view.findViewById(R.id.tvEndDate);
+        ivBeginDate.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                DialogFragment newFragment = new SelectDateFragment();
+                newFragment.show(getFragmentManager(), "begin_date");
+
+            }
+        });
+
+        ivEndDate.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+
+                DialogFragment newFragment = new SelectDateFragment();
+                newFragment.show(getFragmentManager(), "end_date");
+
+            }
+        });
+//        spinner = (Spinner) view.findViewById(R.id.spinnerDate);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.date_options, android.R.layout.simple_spinner_item);
 // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 // Apply the adapter to the spinner
-        spinner.setAdapter(adapter);
+//        spinner.setAdapter(adapter);
 
         String[] strArr = getResources().getStringArray(R.array.news_desks);
 
@@ -109,17 +144,52 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
                     case R.id.switch_compat:
                         setSortOrder(isChecked);
                         break;
-
                 }
             }
         };
     }
 
+    public class SelectDateFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar c = Calendar.getInstance();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            return new DatePickerDialog(getActivity(), this, year, month, day);
+        }
+
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            setDate(this.getTag(), year, month, day);
+        }
+
+    }
+
+    private void setDate(String tag, int year, int month, int day){
+        SimpleDateFormat apiFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat displayFormat = new SimpleDateFormat("MM/dd/yyyy");
+        Calendar calendar =  Calendar.getInstance();
+        calendar.clear();
+        calendar.set(year, month, day);
+        sharedpreferences.edit().putString(tag, apiFormat.format(calendar.getTime())).commit();
+        switch (tag){
+            case "begin_date":tvBeginDate.setText(displayFormat.format(calendar.getTime()));
+                tvBeginDate.setVisibility(View.VISIBLE);
+                break;
+            case "end_date":tvEndDate.setText(displayFormat.format(calendar.getTime()));
+                tvEndDate.setVisibility(View.VISIBLE);
+                break;
+
+        }
+    }
+
+
     private void setSortOrder(boolean state) {
         if (state) {
-            sharedpreferences.edit().putString("sort_order", Utilities.SORT_BY_NEWEST).commit();
+            sharedpreferences.edit().putString("sort", Utilities.SORT_BY_NEWEST).commit();
         } else {
-            sharedpreferences.edit().putString("sort_order", Utilities.SORT_BY_OLDEST).commit();
+            sharedpreferences.edit().putString("sort", Utilities.SORT_BY_OLDEST).commit();
         }
     }
 
@@ -129,18 +199,26 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
         mFlowLayoutFilter.removeAllViews();
 
         int length = mArrFilter.size();
+        sharedpreferences.edit().putString("news_desk", "").commit();
         boolean isSelected = false;
         for (int i = 0; i < length; i++) {
             Filter_Object fil = mArrFilter.get(i);
+            Log.i("nd", fil.mName);
             if (fil.mIsSelected) {
+                String news_desk = sharedpreferences.getString("news_desk", "");
+                Log.i("Adding", news_desk + " \"" + fil.mName + "\" ");
+                sharedpreferences.edit().putString("news_desk", news_desk + " \"" + fil.mName + "\" ").commit();
                 isSelected = true;
                 arrFilterSelected.add(fil);
             }
         }
+
+        Log.i("news_desk", sharedpreferences.getString("news_desk", "test"));
+
         if (isSelected) {
             mScrollViewFilter.setVisibility(View.VISIBLE);
         } else {
-            mScrollViewFilter.setVisibility(View.GONE);
+            mScrollViewFilter.setVisibility(View.INVISIBLE);
         }
         int size = arrFilterSelected.size();
         LayoutInflater layoutInflater = (LayoutInflater)
@@ -224,7 +302,6 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.filter_list_item, null);
                 viewHolder = new ViewHolder();
                 viewHolder.mTtvName = (TextView) convertView.findViewById(R.id.tvName);
-                viewHolder.mTvSelected = (TextView) convertView.findViewById(R.id.tvSelected);
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
@@ -232,11 +309,6 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
             final Filter_Object mService_Object = arrMenu.get(position);
             viewHolder.mTtvName.setText(mService_Object.mName);
 
-            if (mService_Object.mIsSelected) {
-                viewHolder.mTvSelected.setVisibility(View.VISIBLE);
-            } else {
-                viewHolder.mTvSelected.setVisibility(View.INVISIBLE);
-            }
             convertView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -252,7 +324,7 @@ public class SearchFilterFragment extends BottomSheetDialogFragment {
         }
 
         public class ViewHolder {
-            TextView mTtvName, mTvSelected;
+            TextView mTtvName;
 
         }
     }

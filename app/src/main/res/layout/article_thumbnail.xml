@@ -37,6 +37,8 @@
             tools:text="Article title"
             android:id="@+id/tvTitle"
             android:padding="5dp"
+            android:typeface="serif"
+            android:textSize="12sp"
             android:layout_below="@+id/ivThumbnail"
             android:textColor="@color/colorPrimary"/>
         

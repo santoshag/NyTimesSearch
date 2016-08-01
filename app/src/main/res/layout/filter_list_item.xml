@@ -4,27 +4,16 @@
     android:layout_height="wrap_content"
     >
 
-
     <TextView
         android:id="@+id/tvName"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:paddingLeft="10dp"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
         android:text="Medium Text"
         android:gravity="center_vertical"
         android:layout_centerVertical="true"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/colorPrimary" />
+        android:textColor="@color/colorPrimary"/>
 
-    <TextView
-        android:id="@+id/tvSelected"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
-        android:text="\u2713"
-        android:layout_centerVertical="true"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/colorPrimary" />
 
 </RelativeLayout>
