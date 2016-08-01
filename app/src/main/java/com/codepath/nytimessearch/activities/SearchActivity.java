@@ -20,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.codepath.nytimessearch.R;
 import com.codepath.nytimessearch.adapters.ArticleAdapter;
@@ -83,9 +84,7 @@ public class SearchActivity extends AppCompatActivity {
         // Get the intent, verify the action and get the query
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            Log.i("Search", intent.getStringExtra(SearchManager.QUERY));
             String query = intent.getStringExtra(SearchManager.QUERY);
-
             searchArticles(query);
         }
 
@@ -129,7 +128,9 @@ public class SearchActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        Utilities.checkForInternet();
+        if(!Utilities.checkForInternet()){
+            Toast.makeText(this, "Internet is not connected", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -154,8 +155,7 @@ public class SearchActivity extends AppCompatActivity {
 
     public void searchArticles(final String searchQuery) {
 
-
-
+        Toast.makeText(this, "Find articles related to " + searchQuery, Toast.LENGTH_LONG).show();
         // Lookup the recyclerview in activity layout
         //rvArticles.setItemAnimator(new SlideInUpAnimator(new OvershootInterpolator(1f)));
 
@@ -262,7 +262,7 @@ public class SearchActivity extends AppCompatActivity {
         String end_date = filterPreferences.getString("end_date", "");
         String news_desk = filterPreferences.getString("news_desk", "");
 
-        Log.i("info", "sort: " + sort + " begin_date:" + begin_date + " end_date:" + end_date);
+        Log.d("info", "sort: " + sort + " begin_date:" + begin_date + " end_date:" + end_date + "news_desk:" + news_desk);
 
         if (!TextUtils.isEmpty(sort)) {
             params.put("sort", sort);
@@ -277,7 +277,6 @@ public class SearchActivity extends AppCompatActivity {
             params.put("fq", "news_desk:(" + news_desk + ")");
         }
 
-        //fq=news_desk:("Sports"%20"Foreign")
 
         ArticlesService articlesService = retrofit.create(ArticlesService.class);
         Call<Response> call = articlesService.listArticles(params);
