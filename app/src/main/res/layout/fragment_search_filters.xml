@@ -139,12 +139,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.codepath.nytimessearch.fragments.FlowLayout
+            <com.santoshag.nytimessearch.fragments.FlowLayout
                 android:id="@+id/flFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="start|top"
-                android:minHeight="0dp"></com.codepath.nytimessearch.fragments.FlowLayout>
+                android:minHeight="0dp"></com.santoshag.nytimessearch.fragments.FlowLayout>
         </LinearLayout>
 
     </ScrollView>

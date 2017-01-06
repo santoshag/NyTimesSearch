@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.codepath.nytimessearch">
+    package="com.santoshag.nytimessearch">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activities.SearchActivity"
+            android:name="com.santoshag.nytimessearch.activities.SearchActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="standard">
@@ -25,11 +25,11 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".activities.ArticleDetailActivity"
+            android:name="com.santoshag.nytimessearch.activities.ArticleDetailActivity"
             android:label="@string/title_activity_article_detail"
             android:theme="@style/AppTheme"></activity>
         <activity
-            android:name=".activities.SplashActivity"
+            android:name="com.santoshag.nytimessearch.activities.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
