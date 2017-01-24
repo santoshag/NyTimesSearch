@@ -1,6 +1,7 @@
 package com.santoshag.nytimessearch.activities;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.view.MenuItemCompat;
@@ -15,6 +16,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.santoshag.nytimessearch.R;
+import com.santoshag.nytimessearch.databinding.ActivityArticleDetailBinding;
 import com.santoshag.nytimessearch.models.Article;
 
 import org.parceler.Parcels;
@@ -33,10 +35,14 @@ public class ArticleDetailActivity extends AppCompatActivity implements TextToSp
     private ShareActionProvider mShareActionProvider;
     private Boolean isPlaying = false;
     private Article article;
+    private ActivityArticleDetailBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_article_detail);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_article_detail);
+
+//        setContentView(R.layout.activity_article_detail);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 

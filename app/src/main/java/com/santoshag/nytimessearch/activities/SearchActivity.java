@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.databinding.DataBindingUtil;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -18,11 +19,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.santoshag.nytimessearch.R;
 import com.santoshag.nytimessearch.adapters.ArticleAdapter;
+import com.santoshag.nytimessearch.databinding.ActivitySearchBinding;
 import com.santoshag.nytimessearch.decorators.ItemClickSupport;
 import com.santoshag.nytimessearch.fragments.SearchFilterFragment;
 import com.santoshag.nytimessearch.models.Article;
@@ -50,6 +53,8 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static android.view.View.GONE;
+
 public class SearchActivity extends AppCompatActivity {
 
 
@@ -59,17 +64,24 @@ public class SearchActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.rvArticles)
     RecyclerView rvArticles;
+    @BindView(R.id.llPlaceHolder)
+    LinearLayout llPlaceHolder;
+    @BindView(R.id.llProgressBar)
+    LinearLayout llProgressBar;
     @BindView(R.id.toolbar_title)
     TextView toolbar_title;
     ArrayList<Article> articles;
     ArticleAdapter adapter;
     final static String BASE_URL = "https://api.nytimes.com";
     SharedPreferences filterPreferences;
+    ActivitySearchBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+
+//        setContentView(R.layout.activity_search);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -136,15 +148,29 @@ public class SearchActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_search) {
-            SearchFilterFragment myDialog = new SearchFilterFragment();
-            FragmentManager fm = getSupportFragmentManager();
-            myDialog.show(fm, "test");
+            onClickSearch(null);
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    public void onClickSearch(View view){
+
+        llPlaceHolder.setVisibility(GONE);
+        llProgressBar.setVisibility(GONE);
+        rvArticles.setVisibility(GONE);
+
+        SearchFilterFragment myDialog = new SearchFilterFragment();
+        FragmentManager fm = getSupportFragmentManager();
+        myDialog.show(fm, "test");
+    }
+
     public void searchArticles(final String searchQuery) {
+
+
+        llPlaceHolder.setVisibility(View.GONE);
+        llProgressBar.setVisibility(View.VISIBLE);
+        rvArticles.setVisibility(View.GONE);
 
         Toast.makeText(this, "Data provided by The New York Times", Toast.LENGTH_LONG).show();
         // Lookup the recyclerview in activity layout
@@ -270,6 +296,10 @@ public class SearchActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+
+                llProgressBar.setVisibility(GONE);
+                llPlaceHolder.setVisibility(GONE);
+                rvArticles.setVisibility(View.VISIBLE);
                 int statusCode = response.code();
                 try {
                     Response r = response.body();
